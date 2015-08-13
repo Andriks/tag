@@ -10,11 +10,18 @@ ApplicationWindow {
     visible: true
 
     menuBar: MenuBar {
+        function randomize() {
+            // some code
+            return;
+        }
+
         Menu {
+
+
             title: qsTr("&File")
             MenuItem {
-                text: qsTr("&TODO")
-//                onTriggered: messageDialog.show(qsTr("Open action triggered"));
+                text: qsTr("&Randomize")
+                onTriggered: randomize();
             }
             MenuItem {
                 text: qsTr("E&xit")
@@ -24,6 +31,14 @@ ApplicationWindow {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    function able_to_move(from, to) {
+
+
+        return true
+    }
+
+
     Rectangle {
         width: parent.height; height: parent.width
         anchors.fill: parent
@@ -34,37 +49,47 @@ ApplicationWindow {
         ListModel {
             id: dataModel
 
-            ListElement { text: "1"; location: 1 }
-            ListElement { text: "2"; location: 2 }
-            ListElement { text: "3"; location: 3 }
-            ListElement { text: "4"; location: 4 }
-            ListElement { text: "5"; location: 5 }
-            ListElement { text: "6"; location: 6 }
-            ListElement { text: "7"; location: 7 }
-            ListElement { text: "8"; location: 8 }
-            ListElement { text: "9"; location: 9 }
+            Component.onCompleted: {
+                var value
+                for (var i=0; i<4; i++) {
+                    for (var j=0; j<4; j++) {
+                        var num = i*4+j
+
+                        value = {
+                            color: num === 15 ? "white": "lightgreen",
+                            x: i,
+                            y: j,
+                            text: "%1".arg(num+1),
+                        }
+                        append(value)
+                    }
+                }
+
+
+            }
 
         }
-
 
         GridView {
             id: view
 
-            property real freeCell: 9
-            currentIndex: 8
+            property real freeCell: 8
 
             anchors.margins: 10
             anchors.fill: parent
             anchors.centerIn: parent
-            cellHeight: parent.height/4
-            cellWidth: parent.width/4
+            cellHeight: parent.height/5
+            cellWidth: parent.width/5
             model: dataModel
             clip: true
+
+            move: Transition {
+                NumberAnimation { properties: "x,y"; duration: 800; easing.type: Easing.OutBack }
+            }
 
 
             delegate: Item {
                 property var view: GridView.view
-                property var isCurrent: GridView.isCurrentItem
 
 
                 height: view.cellHeight
@@ -73,22 +98,30 @@ ApplicationWindow {
                 Rectangle {
                     anchors.margins: 5
                     anchors.fill: parent
-                    color: isCurrent ? "white" : "lightgreen"
+                    color: model.color
 
                     Text {
                         anchors.centerIn: parent
                         renderType: Text.NativeRendering
-                        text: isCurrent ? "" : "%1".arg(model.text)
+                        text: "%1 || %2 (%3,%4)".arg(model.text).arg(model.index).arg(model.x).arg(model.y)
                     }
 
                     MouseArea {
                         anchors.fill: parent
                         onClicked:
                         {
+                            if (able_to_move(view.model.index, view.freeCell)) {
+                                var old_index = model.index
+                                var old_x = model.x
+                                var old_y = model.y
 
-                            view.currentIndex = model.index
+                                view.model.move(model.index, model.index+1, 1)
+
+                                view.freeCell = old_index
+                                model.x = old_x
+                                model.y = old_y
+                            }
                         }
-
                     }
                 }
             }
