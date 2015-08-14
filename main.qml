@@ -12,38 +12,40 @@ ApplicationWindow {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    function getRandomInt(min, max)
-    {
+    function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-
 
     function randomize(view) {
         for (var i = 0; i < 500; i++) {
             var x = getRandomInt(0, 15);
             var y = getRandomInt(0, 15);
 
-            var min = Math.min(x, y);
-            var max = Math.max(x, y);
+            view.model.move(x, y, 1);
+        }
 
-            view.model.move(min, max, 1);
-
-            if (min === view.freeCell) {
-                view.freeCell = max;
-                continue;
-            }
-
-            if (min < view.freeCell && max >= view.freeCell) {
-                view.freeCell--;
-                continue;
-            }
+        // puting right value in freeCell
+        for (i = 0; i < 15; i++) {
+            // all cells except empty have theirs number as text
+            if (!view.model.get(i).text)
+                view.freeCell = i;
         }
     }
 
-    function game_complited() {
-        return false;
+    ////////////////////////////////////////
+
+    function game_complited(view) {
+        for (var i = 0; i < 15; i++) {
+            var cell_number = parseInt(view.model.get(i).text) - 1;  // parse text to get number of cell
+
+            if (cell_number !== i)
+                return false;
+        }
+
+        return true;
     }
 
+    ////////////////////////////////////////
     function getPoint(p) {
         var x_ = Math.floor(p / 4);
         var y_ = p - (x_ * 4);
@@ -80,6 +82,24 @@ ApplicationWindow {
         return false;
     }
 
+    function move_cell(view) {
+        if (able_to_move(view.currentIndex, view.freeCell)) {
+            var old_index = view.currentIndex;
+            view.model.move(old_index, view.freeCell, 1);
+
+            if (old_index < view.freeCell)
+                view.model.move(view.freeCell-1, old_index, 1);
+            else
+                view.model.move(view.freeCell+1, old_index, 1);
+
+            view.freeCell = old_index;
+
+            if (game_complited(view)) {
+                messageDialog.show("Congratulation, you win!!")
+            }
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     menuBar: MenuBar {
@@ -104,8 +124,6 @@ ApplicationWindow {
         width: parent.height; height: parent.width
         anchors.fill: parent
         anchors.centerIn: parent
-
-        border.width: 10
 
         ListModel {
             id: dataModel
@@ -134,13 +152,11 @@ ApplicationWindow {
             id: view
 
             property real freeCell: 15
-            currentIndex: 15
 
-            anchors.margins: 10
             anchors.fill: parent
             anchors.centerIn: parent
-            cellHeight: parent.height/5
-            cellWidth: parent.width/5
+            cellHeight: parent.height/4
+            cellWidth: parent.width/4
             model: dataModel
             clip: true
 
@@ -158,6 +174,7 @@ ApplicationWindow {
 
                 Rectangle {
                     anchors.margins: 5
+                    radius: 15
                     anchors.fill: parent
                     color: model.color
                     opacity: model.opacity
@@ -172,21 +189,8 @@ ApplicationWindow {
                         anchors.fill: parent
                         onClicked:
                         {
-                            if (able_to_move(model.index, view.freeCell)) {
-                                var old_index = model.index;
-                                view.model.move(old_index, view.freeCell, 1);
-
-                                if (old_index < view.freeCell)
-                                    view.model.move(view.freeCell-1, old_index, 1);
-                                else
-                                    view.model.move(view.freeCell+1, old_index, 1);
-
-                                view.freeCell = old_index;
-
-                                if (game_complited()) {
-                                    messageDialog.show("Congratulation, you win!!")
-                                }
-                            }
+                            view.currentIndex = model.index;
+                            move_cell(view);
                         }
                     }
                 }
