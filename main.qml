@@ -3,35 +3,46 @@ import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.2
 
+
 ApplicationWindow {
     title: qsTr("Tag")
     width: 500
     height: 500
     visible: true
 
-    menuBar: MenuBar {
-        function randomize() {
-            // some code
-            return;
-        }
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
-        Menu {
+    function getRandomInt(min, max)
+    {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
 
-            title: qsTr("&File")
-            MenuItem {
-                text: qsTr("&Randomize")
-                onTriggered: randomize();
+    function randomize(view) {
+        for (var i = 0; i < 500; i++) {
+            var x = getRandomInt(0, 15);
+            var y = getRandomInt(0, 15);
+
+            var min = Math.min(x, y);
+            var max = Math.max(x, y);
+
+            view.model.move(min, max, 1);
+
+            if (min === view.freeCell) {
+                view.freeCell = max;
+                continue;
             }
-            MenuItem {
-                text: qsTr("E&xit")
-                onTriggered: Qt.quit();
+
+            if (min < view.freeCell && max >= view.freeCell) {
+                view.freeCell--;
+                continue;
             }
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
+    function game_complited() {
+        return false;
+    }
 
     function getPoint(p) {
         var x_ = Math.floor(p / 4);
@@ -69,6 +80,25 @@ ApplicationWindow {
         return false;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    menuBar: MenuBar {
+        Menu {
+            title: qsTr("&File")
+
+            MenuItem {
+                text: qsTr("&Randomize")
+                onTriggered: randomize(view)
+            }
+
+            MenuItem {
+                text: qsTr("E&xit")
+                onTriggered: Qt.quit();
+            }
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     Rectangle {
         width: parent.height; height: parent.width
@@ -88,8 +118,9 @@ ApplicationWindow {
                         var num = i * 4 + j;
 
                         value = {
+                            id: "c%1".arg(num),
                             color: "lightgreen",
-                            opacity: num === 15 ? 0.3: 1,
+                            opacity: num === 15 ? 0: 1,
                             text: num === 15 ? "": "%1".arg(num + 1)
                         };
 
@@ -103,6 +134,7 @@ ApplicationWindow {
             id: view
 
             property real freeCell: 15
+            currentIndex: 15
 
             anchors.margins: 10
             anchors.fill: parent
@@ -150,6 +182,10 @@ ApplicationWindow {
                                     view.model.move(view.freeCell+1, old_index, 1);
 
                                 view.freeCell = old_index;
+
+                                if (game_complited()) {
+                                    messageDialog.show("Congratulation, you win!!")
+                                }
                             }
                         }
                     }
@@ -158,5 +194,14 @@ ApplicationWindow {
         }
     }
 
+    MessageDialog {
+        id: messageDialog
+        title: qsTr("tag")
+
+        function show(caption) {
+            messageDialog.text = caption;
+            messageDialog.open();
+        }
+    }
 
 }
