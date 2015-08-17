@@ -10,27 +10,6 @@ ApplicationWindow {
     height: 500
     visible: true
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
-    function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    function randomize(view) {
-        for (var i = 0; i < 500; i++) {
-            var x = getRandomInt(0, 15);
-            var y = getRandomInt(0, 15);
-
-            view.model.move(x, y, 1);
-        }
-
-        // puting right value in freeCell
-        for (i = 0; i < 15; i++) {
-            // all cells except empty have theirs number as text
-            if (!view.model.get(i).text)
-                view.freeCell = i;
-        }
-    }
 
     ////////////////////////////////////////
 
@@ -45,60 +24,7 @@ ApplicationWindow {
         return true;
     }
 
-    ////////////////////////////////////////
-    function getPoint(p) {
-        var x_ = Math.floor(p / 4);
-        var y_ = p - (x_ * 4);
 
-        return {x: x_,
-                y: y_};
-    }
-
-    function eq(p1, p2) {
-        if (p1.x === p2.x && p1.y === p2.y)
-            return true;
-
-        return false;
-    }
-
-
-    function able_to_move(from, to) {
-        var p_from = getPoint(from);
-        var p_to = getPoint(to);
-
-        if (eq({x: p_from.x, y: p_from.y - 1}, p_to))
-            return true;
-
-        if (eq({x: p_from.x, y: p_from.y + 1}, p_to))
-            return true;
-
-        if (eq({x: p_from.x - 1, y: p_from.y}, p_to))
-            return true;
-
-        if (eq({x: p_from.x + 1, y: p_from.y}, p_to))
-            return true;
-
-
-        return false;
-    }
-
-    function move_cell(view) {
-        if (able_to_move(view.currentIndex, view.freeCell)) {
-            var old_index = view.currentIndex;
-            view.model.move(old_index, view.freeCell, 1);
-
-            if (old_index < view.freeCell)
-                view.model.move(view.freeCell-1, old_index, 1);
-            else
-                view.model.move(view.freeCell+1, old_index, 1);
-
-            view.freeCell = old_index;
-
-            if (game_complited(view)) {
-                messageDialog.show("Congratulation, you win!!")
-            }
-        }
-    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -108,7 +34,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: qsTr("&Randomize")
-                onTriggered: randomize(view)
+                onTriggered: controller.randomize()
             }
 
             MenuItem {
@@ -127,31 +53,32 @@ ApplicationWindow {
 
         ListModel {
             id: dataModel
+            objectName: "dataModel"
 
             Component.onCompleted: {
                 var value;
 
-                for (var i = 0; i < 4; i++) {
-                    for (var j = 0; j < 4; j++) {
-                        var num = i * 4 + j;
+                for (var i = 0; i < 16; i++) {
+                    value = {
+                        color: "lightgreen",
+                        opacity: i === 15 ? 0: 1,
+                        text: i === 15 ? "": "%1".arg(i + 1)
+                    };
 
-                        value = {
-                            id: "c%1".arg(num),
-                            color: "lightgreen",
-                            opacity: num === 15 ? 0: 1,
-                            text: num === 15 ? "": "%1".arg(num + 1)
-                        };
-
-                        append(value);
-                    }
+                    append(value);
                 }
             }
         }
 
         GridView {
             id: view
+            objectName: "view"
 
             property real freeCell: 15
+
+            function moveItem(inx1, inx2) {
+                view.model.move(inx1, inx2, 1)
+            }
 
             anchors.fill: parent
             anchors.centerIn: parent
@@ -190,7 +117,7 @@ ApplicationWindow {
                         onClicked:
                         {
                             view.currentIndex = model.index;
-                            move_cell(view);
+                            controller.move_cell();
                         }
                     }
                 }
@@ -200,6 +127,7 @@ ApplicationWindow {
 
     MessageDialog {
         id: messageDialog
+        objectName: "messageDialog"
         title: qsTr("tag")
 
         function show(caption) {
