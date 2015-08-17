@@ -73,24 +73,17 @@ ApplicationWindow {
         GridView {
             id: view
             objectName: "view"
-
-            property real freeCell: 15
-
-            function moveItem(inx1, inx2) {
-                view.model.move(inx1, inx2, 1)
-            }
+            model: dataModel
 
             anchors.fill: parent
             anchors.centerIn: parent
-            cellHeight: parent.height/4
-            cellWidth: parent.width/4
-            model: dataModel
+            cellHeight: parent.height / 4
+            cellWidth: parent.width / 4
             clip: true
 
             move: Transition {
                 NumberAnimation { properties: "x,y"; duration: 800; easing.type: Easing.OutBounce }
             }
-
 
             delegate: Item {
                 property var view: GridView.view

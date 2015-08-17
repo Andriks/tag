@@ -14,15 +14,16 @@ signals:
 
 public slots:
     void randomize();
-    QPoint getPoint(int);
-    bool able_to_move(int, int);
     void move_cell();
 
-
+private:
+    bool game_complited();
+    QPoint getPoint(int);
+    bool able_to_move(int, int);
+    void toMe();
 private:
     QObject *root_;
     size_t free_cell_;
-    const size_t size_of_tag_;
 
 };
 
