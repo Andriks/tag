@@ -49,9 +49,13 @@ void AbstractModel::randomize()
         moveFromTo(x, y);
     }
     for (int i = 0; i < 16; i++) {
-        if (data_list_[i].name() == "16")
+        if (data_list_[i].name() == "16") {
             free_cell_ = i;
+            break;
+        }
     }
+
+    qDebug() << free_cell_;
 }
 
 QPoint AbstractModel::getPoint(int p)
@@ -149,27 +153,27 @@ void AbstractModel::moveFromTo(int from, int to)
     if (from == to)
         return;
 
-    int min = std::min(from, to);
-    int max = std::max(from, to);
+    if (std::abs(from - to) > 1) {
+        int min = std::min(from, to);
+        int max = std::max(from, to);
 
-    if (max-min > 1) {
         beginMoveRows(QModelIndex(), max, max, QModelIndex(), min);
-        data_list_.move(max, min);
         endMoveRows();
 
         beginMoveRows(QModelIndex(), min+1, min+1, QModelIndex(), max+1);
-        data_list_.move(min+1, max);
         endMoveRows();
-    } else {
-        if (to > from) {
-            beginMoveRows(QModelIndex(), min, min, QModelIndex(), max+1);
-            data_list_.move(min, max);
-        } else {
-            beginMoveRows(QModelIndex(), max, max, QModelIndex(), min);
-            data_list_.move(max, min);
-        }
 
+        data_list_.move(max, min);
+        data_list_.move(min+1, max);
+    } else {
+        int add_nun = 0;
+        if (from < to)
+            add_nun = 1;
+
+        beginMoveRows(QModelIndex(), from, from, QModelIndex(), to + add_nun);
         endMoveRows();
+
+        data_list_.move(from, to);
     }
 }
 
