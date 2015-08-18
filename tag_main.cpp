@@ -5,6 +5,8 @@
 #include <QList>
 #include <QObject>
 
+#include <QtQml>
+
 #include "controller.h"
 
 
@@ -16,9 +18,8 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/tag_main.qml")));
 
-    QObject* root = engine.rootObjects()[0];
-    Controller controller(root);
-    engine.rootContext()->setContextProperty("controller", &controller);
+    AbstractModel model(engine.rootContext());
+    engine.rootContext()->setContextProperty("dataModel", &model);
 
     return app.exec();
 }

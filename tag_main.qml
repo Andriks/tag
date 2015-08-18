@@ -3,28 +3,11 @@ import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.2
 
-
 ApplicationWindow {
     title: qsTr("Tag")
     width: 500
     height: 500
     visible: true
-
-
-    ////////////////////////////////////////
-
-    function game_complited(view) {
-        for (var i = 0; i < 15; i++) {
-            var cell_number = parseInt(view.model.get(i).text) - 1;  // parse text to get number of cell
-
-            if (cell_number !== i)
-                return false;
-        }
-
-        return true;
-    }
-
-
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,7 +17,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: qsTr("&Randomize")
-                onTriggered: controller.randomize()
+                onTriggered: dataModel.randomize()
             }
 
             MenuItem {
@@ -50,25 +33,6 @@ ApplicationWindow {
         width: parent.height; height: parent.width
         anchors.fill: parent
         anchors.centerIn: parent
-
-        ListModel {
-            id: dataModel
-            objectName: "dataModel"
-
-            Component.onCompleted: {
-                var value;
-
-                for (var i = 0; i < 16; i++) {
-                    value = {
-                        color: "lightgreen",
-                        opacity: i === 15 ? 0: 1,
-                        text: i === 15 ? "": "%1".arg(i + 1)
-                    };
-
-                    append(value);
-                }
-            }
-        }
 
         GridView {
             id: view
@@ -88,7 +52,6 @@ ApplicationWindow {
             delegate: Item {
                 property var view: GridView.view
 
-
                 height: view.cellHeight
                 width: view.cellWidth
 
@@ -102,19 +65,16 @@ ApplicationWindow {
                     Text {
                         anchors.centerIn: parent
                         renderType: Text.NativeRendering
-                        text: model.text
+                        text: model.name
                     }
 
                     MouseArea {
                         anchors.fill: parent
-                        onClicked:
-                        {
-                            view.currentIndex = model.index;
-                            controller.move_cell();
-                        }
+                        onClicked: dataModel.moveCell(model.index)
                     }
                 }
             }
+
         }
     }
 
@@ -130,3 +90,4 @@ ApplicationWindow {
     }
 
 }
+

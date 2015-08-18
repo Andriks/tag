@@ -3,28 +3,61 @@
 
 #include <QObject>
 #include <QPoint>
+#include <QQmlApplicationEngine>
+#include <QAbstractItemModel>
+#include <QStringList>
 
-class Controller : public QObject
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+class AbstractModel : public QAbstractListModel
 {
     Q_OBJECT
-public:
-    explicit Controller(QObject *parent = 0);
 
-signals:
+    class TagElement
+    {
+    public:
+        TagElement(const QString &name, const QString &color, const QString &opacity);
+
+        QString name() const;
+        QString color() const;
+        QString opacity() const;
+
+    private:
+        QString name_;
+        QString color_;
+        QString opacity_;
+    };
+
+public:
+    enum AnimalRoles {
+        NameRole = Qt::UserRole + 1,
+        ColorRole,
+        OpacityRole,
+    };
+
+    AbstractModel(QObject *parent = 0);
+
+    QPoint getPoint(int);
+    bool ableToMove(int, int);
+    bool gameComplited();
+
+    int rowCount(const QModelIndex & parent = QModelIndex()) const;
+    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+    QHash<int, QByteArray> roleNames() const;
 
 public slots:
+    void moveCell(int);
     void randomize();
-    void move_cell();
 
 private:
-    bool game_complited();
-    QPoint getPoint(int);
-    bool able_to_move(int, int);
-    void toMe();
+    void moveFromTo(int, int);
+
 private:
     QObject *root_;
-    size_t free_cell_;
-
+    QList<TagElement> data_list_;
+    int free_cell_;
 };
 
 #endif // CONTROLLER_H
