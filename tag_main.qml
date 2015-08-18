@@ -59,7 +59,7 @@ ApplicationWindow {
                     anchors.margins: 5
                     radius: 15
                     anchors.fill: parent
-                    color: model.color
+                    color: "lightgreen"
                     opacity: model.opacity
 
                     Text {
@@ -74,7 +74,6 @@ ApplicationWindow {
                     }
                 }
             }
-
         }
     }
 

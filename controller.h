@@ -1,12 +1,8 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include <QObject>
-#include <QPoint>
-#include <QQmlApplicationEngine>
 #include <QAbstractItemModel>
-#include <QStringList>
-
+#include <QPoint>
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -15,34 +11,30 @@ class AbstractModel : public QAbstractListModel
 {
     Q_OBJECT
 
+    ///////////////////////////////////////////////////////
     class TagElement
     {
     public:
-        TagElement(const QString &name, const QString &color, const QString &opacity);
+        TagElement(const QString &, const QString &);
 
         QString name() const;
-        QString color() const;
         QString opacity() const;
 
     private:
         QString name_;
-        QString color_;
         QString opacity_;
     };
 
-public:
-    enum AnimalRoles {
+    ///////////////////////////////////////////////////////
+    enum TagElemRoles {
         NameRole = Qt::UserRole + 1,
-        ColorRole,
-        OpacityRole,
+        OpacityRole
     };
 
+public:
     AbstractModel(QObject *parent = 0);
 
-    QPoint getPoint(int);
-    bool ableToMove(int, int);
-    bool gameComplited();
-
+    // for QML Engine
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     QHash<int, QByteArray> roleNames() const;
@@ -52,6 +44,10 @@ public slots:
     void randomize();
 
 private:
+    // for game logic
+    QPoint getPoint(int);
+    bool ableToMove(int, int);
+    bool gameComplited();
     void moveFromTo(int, int);
 
 private:
