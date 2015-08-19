@@ -9,6 +9,10 @@ ApplicationWindow {
     height: 500
     visible: true
 
+    minimumHeight: 400
+    minimumWidth: 400
+
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     menuBar: MenuBar {
@@ -41,8 +45,8 @@ ApplicationWindow {
 
             anchors.fill: parent
             anchors.centerIn: parent
-            cellHeight: parent.height / 4
-            cellWidth: parent.width / 4
+            cellHeight: parent.height / model.edgeSize;
+            cellWidth: parent.width / model.edgeSize;
             clip: true
 
             move: Transition {
@@ -70,7 +74,9 @@ ApplicationWindow {
 
                     MouseArea {
                         anchors.fill: parent
+
                         onClicked: dataModel.moveCell(model.index)
+                        //onFocusChanged: color = "red"
                     }
                 }
             }

@@ -18,6 +18,7 @@ QString AbstractModel::TagElement::name() const
 QString AbstractModel::TagElement::opacity() const
 {
     return opacity_;
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,38 +26,23 @@ QString AbstractModel::TagElement::opacity() const
 AbstractModel::AbstractModel(QObject *parent) :
     QAbstractListModel(parent),
     root_(parent),
-    free_cell_(15)
+    edge_size_(4)
 {
-    for (int i = 0; i < 16; i++) {
-        data_list_.append(TagElement(QString("%1").arg(i+1), (i == free_cell_ ? "0" : "1")));
-    }
-}
+    int dim_size = edge_size_ * edge_size_;
+    free_cell_ = dim_size - 1;
 
-
-void AbstractModel::randomize()
-{
-    for (int i = 0; i < 500; i++) {
-        int x = std::rand() % 16;
-        int y = std::rand() % 16;
-
-        moveFromTo(x, y);
-    }
-
-    for (int i = 0; i < 16; i++) {
-        if (data_list_[i].name() == "16") {
-            free_cell_ = i;
-            break;
-        }
+    for (int i = 0; i < dim_size; i++) {
+        data_list_.push_back(TagElement(QString("%1").arg(i+1), (i == free_cell_ ? "0" : "1")));
     }
 }
 
 
 int AbstractModel::rowCount(const QModelIndex & parent) const {
-    return data_list_.count();
+    return data_list_.size();
 }
 
 QVariant AbstractModel::data(const QModelIndex & index, int role) const {
-    if (index.row() < 0 || index.row() > data_list_.count())
+    if (index.row() < 0 || index.row() > data_list_.size())
         return QVariant();
 
     const TagElement &el = data_list_[index.row()];
@@ -82,6 +68,37 @@ QHash<int, QByteArray> AbstractModel::roleNames() const {
     return roles;
 }
 
+int AbstractModel::getEdgeSize() const
+{
+    return edge_size_;
+}
+
+void AbstractModel::setEdgeSize(const int val)
+{
+    edge_size_ = val;
+}
+
+
+void AbstractModel::randomize()
+{
+    int dim_size = edge_size_ * edge_size_;
+
+    for (int i = 0; i < edge_size_ * 500; i++) {
+        int x = std::rand() % dim_size;
+        int y = std::rand() % dim_size;
+
+        if (ableToMove(x, y))
+            moveFromTo(x, y);
+    }
+
+    for (int i = 0; i < dim_size; i++) {
+        if (data_list_[i].name() == QString("%1").arg(dim_size)) {
+            free_cell_ = i;
+            break;
+        }
+    }
+}
+
 
 void AbstractModel::moveCell(int index)
 {
@@ -101,8 +118,8 @@ void AbstractModel::moveCell(int index)
 
 QPoint AbstractModel::getPoint(int p)
 {
-    int x = std::ceil(p / 4);
-    int y = p - (x * 4);
+    int x = std::ceil(p / edge_size_);
+    int y = p - (x * edge_size_);
 
     return QPoint(x, y);
 }
@@ -132,7 +149,9 @@ bool AbstractModel::ableToMove(int from, int to)
 
 bool AbstractModel::gameComplited()
 {
-    for (int i = 0; i < 16; i++) {
+    int dim_size = edge_size_ * edge_size_;
+
+    for (int i = 0; i < dim_size; i++) {
         if (data_list_[i].name() != QString("%1").arg(i+1))
             return false;
     }
@@ -155,19 +174,17 @@ void AbstractModel::moveFromTo(int from, int to)
 
         beginMoveRows(QModelIndex(), min+1, min+1, QModelIndex(), max+1);
         endMoveRows();
-
-        data_list_.move(max, min);
-        data_list_.move(min+1, max);
     } else {
-        int add_nun = 0;
+        int add_num = 0;
 
         if (from < to)
-            add_nun = 1;
+            add_num = 1;
 
-        beginMoveRows(QModelIndex(), from, from, QModelIndex(), to + add_nun);
+        beginMoveRows(QModelIndex(), from, from, QModelIndex(), to + add_num);
         endMoveRows();
 
-        data_list_.move(from, to);
     }
+
+    std::swap(data_list_[from], data_list_[to]);
 }
 
