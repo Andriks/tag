@@ -74,9 +74,7 @@ ApplicationWindow {
 
                     MouseArea {
                         anchors.fill: parent
-
                         onClicked: dataModel.moveCell(model.index)
-                        //onFocusChanged: color = "red"
                     }
                 }
             }

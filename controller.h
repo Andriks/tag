@@ -14,10 +14,10 @@ class AbstractModel : public QAbstractListModel
     Q_PROPERTY(int edgeSize READ getEdgeSize WRITE setEdgeSize NOTIFY edgeSizeChanged)
 
     ///////////////////////////////////////////////////////
-    class TagElement
+    class TagCell
     {
     public:
-        TagElement(const QString &, const QString &);
+        TagCell(const QString &, const QString &);
 
         QString name() const;
         QString opacity() const;
@@ -45,7 +45,7 @@ public:
     void setEdgeSize(const int);
 
 public slots:
-    void moveCell(int);
+    void moveCell(const int);
     void randomize();
 
 signals:
@@ -53,15 +53,21 @@ signals:
 
 private:
     // for game logic
-    QPoint getPoint(int);
-    bool ableToMove(int, int);
+    bool inRange(int);
+    std::vector<QPoint> cellsToMove(QPoint);
+
+    QPoint getPointFromIndex(const int);
+    int getIndexFromPoint(const QPoint);
+
+    bool ableToMove(const int, const int);
     bool gameComplited();
-    void moveFromTo(int, int);
+
+    void moveFromTo(const int, const int);
+    void moveFromTo(const QPoint, const QPoint);
 
 private:
     QObject *root_;
-//    QList<TagElement> data_list_;
-    std::vector<TagElement> data_list_;
+    std::vector<TagCell> data_list_;
     int free_cell_;
     int edge_size_;
 
